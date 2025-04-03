@@ -12,11 +12,9 @@ interface DestinationSectionProps {
   cities: City[];
   selectedCity: string;
   days: number;
-  searchQuery?: string;
   useAI?: boolean;
   onCitySelect: (city: string) => void;
   onDaysChange: (days: number) => void;
-  onSearchChange?: (query: string) => void;
   onAIToggle?: (useAI: boolean) => void;
   onGenerateItinerary: () => void;
   allCities?: City[];  // Full list of all cities for the dropdown
@@ -26,11 +24,9 @@ export default function DestinationSection({
   cities,
   selectedCity,
   days,
-  searchQuery = "",
   useAI = true,
   onCitySelect,
   onDaysChange,
-  onSearchChange,
   onAIToggle,
   onGenerateItinerary,
   allCities
@@ -59,11 +55,7 @@ export default function DestinationSection({
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (onSearchChange) {
-      onSearchChange(e.target.value);
-    }
-  };
+  // No search functionality with dropdown menu
 
   const handleAIToggle = (checked: boolean) => {
     if (onAIToggle) {
@@ -148,16 +140,7 @@ export default function DestinationSection({
           ) : (
             <div className="col-span-full text-center py-10">
               <h3 className="text-xl font-medium text-neutral-dark mb-2">No destinations found</h3>
-              <p className="text-neutral-muted">Try another search term or browse all Canadian cities</p>
-              {searchQuery && (
-                <Button 
-                  variant="default" 
-                  className="mt-4 bg-[#000080] hover:bg-[#000066] text-white"
-                  onClick={() => onSearchChange?.("")}
-                >
-                  Clear Search
-                </Button>
-              )}
+              <p className="text-neutral-muted">Please select a city from the dropdown menu below</p>
             </div>
           )}
         </div>
@@ -166,40 +149,25 @@ export default function DestinationSection({
         <div className="bg-neutral-lightest rounded-xl p-6 shadow-md max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="w-full md:w-1/2">
-              <label htmlFor="selected-destination" className="block text-neutral-dark font-medium mb-2">Selected Destination</label>
+              <label htmlFor="selected-destination" className="block text-neutral-dark font-medium mb-2">Select Your Destination</label>
               <div className="relative">
-                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
-                <Input 
-                  type="text"
-                  placeholder="Search for any Canadian city..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  className="ps-10 py-3"
-                />
-                {searchQuery && searchQuery.length > 1 && (
-                  <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10 max-h-[300px] overflow-y-auto">
+                <Select
+                  value={selectedCity || ""}
+                  onValueChange={(value) => onCitySelect(value)}
+                >
+                  <SelectTrigger className="w-full py-6">
+                    <SelectValue placeholder="Choose a Canadian city" />
+                  </SelectTrigger>
+                  <SelectContent>
                     {(allCities || cities)
                       .sort((a, b) => a.name.localeCompare(b.name))
-                      .filter(city => city.name.toLowerCase().includes(searchQuery.toLowerCase()))
                       .map((city) => (
-                        <div 
-                          key={city.id} 
-                          className="p-2 hover:bg-neutral-lightest cursor-pointer"
-                          onClick={() => onCitySelect(city.slug)}
-                        >
+                        <SelectItem key={city.id} value={city.slug}>
                           {city.name}
-                        </div>
-                      ))
-                    }
-                    {(allCities || cities).filter(city => 
-                      city.name.toLowerCase().includes(searchQuery.toLowerCase())
-                    ).length === 0 && (
-                      <div className="p-2 text-neutral-muted">No cities found. Try a different search term.</div>
-                    )}
-                  </div>
-                )}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             

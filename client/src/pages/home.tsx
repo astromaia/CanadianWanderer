@@ -16,18 +16,14 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [showItinerary, setShowItinerary] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [useAI, setUseAI] = useState<boolean>(true);
   const { toast } = useToast();
   
-  // Fetch cities for destination selection, with optional search query
-  const { data: allCities, refetch: refetchCities } = useQuery({
-    queryKey: ['/api/cities', searchQuery],
+  // Fetch all Canadian cities for the dropdown menu
+  const { data: allCities } = useQuery({
+    queryKey: ['/api/cities'],
     queryFn: async () => {
-      const endpoint = searchQuery 
-        ? `/api/cities?search=${encodeURIComponent(searchQuery)}` 
-        : '/api/cities';
-      const response = await fetch(endpoint);
+      const response = await fetch('/api/cities');
       if (!response.ok) {
         throw new Error('Failed to fetch cities');
       }
@@ -37,12 +33,9 @@ export default function Home() {
   
   // Filter to just get 3 featured cities for display (Toronto, Vancouver, Montreal)
   // But keep the full list for dropdown selection
-  const cities = allCities && (searchQuery 
-    ? allCities.slice(0, 3)  // For search results, just show top 3
-    : allCities.filter((city: {slug: string}) => 
-        ['toronto', 'vancouver', 'montreal'].includes(city.slug)
-      ).slice(0, 3)  // Show only the three main cities when not searching
-  );
+  const cities = allCities && allCities.filter((city: {slug: string}) => 
+    ['toronto', 'vancouver', 'montreal'].includes(city.slug)
+  ).slice(0, 3);
   
   // State for storing the itinerary
   const [itinerary, setItinerary] = useState<CompleteItinerary | null>(null);
@@ -64,16 +57,7 @@ export default function Home() {
     enabled: false
   });
   
-  // Handle search query changes with debounce
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (searchQuery) {
-        refetchCities();
-      }
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, refetchCities]);
+  // No search functionality needed with dropdown menu
   
   // Flag to track if we should skip AI generation due to quota issues
   const [skipAI, setSkipAI] = useState<boolean>(false);
@@ -201,11 +185,9 @@ export default function Home() {
         cities={cities || []}
         selectedCity={selectedCity}
         days={days}
-        searchQuery={searchQuery}
         useAI={useAI}
         onCitySelect={setSelectedCity}
         onDaysChange={setDays}
-        onSearchChange={setSearchQuery}
         onAIToggle={setUseAI}
         onGenerateItinerary={handleGenerateItinerary}
         allCities={allCities}
