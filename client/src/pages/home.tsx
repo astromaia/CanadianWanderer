@@ -35,8 +35,11 @@ export default function Home() {
     },
   });
   
+  // State for storing the itinerary
+  const [itinerary, setItinerary] = useState<CompleteItinerary | null>(null);
+  
   // Fetch itinerary data when requested
-  const { data: itinerary, refetch: refetchItinerary } = useQuery<CompleteItinerary>({
+  const { refetch: refetchItinerary } = useQuery<CompleteItinerary>({
     queryKey: [`/api/itinerary`, selectedCity, days, useAI],
     queryFn: async () => {
       const endpoint = `/api/itinerary?city=${selectedCity}&days=${days}${useAI ? '&useAI=true' : ''}`;
@@ -45,9 +48,11 @@ export default function Home() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to generate itinerary');
       }
-      return response.json();
+      const data = await response.json();
+      setItinerary(data);
+      return data;
     },
-    enabled: false,
+    enabled: false
   });
   
   // Handle search query changes with debounce
@@ -60,6 +65,9 @@ export default function Home() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery, refetchCities]);
+  
+  // Flag to track if we should skip AI generation due to quota issues
+  const [skipAI, setSkipAI] = useState<boolean>(false);
   
   // Handle itinerary generation
   const handleGenerateItinerary = async () => {
@@ -77,18 +85,66 @@ export default function Home() {
     
     try {
       // AI generation takes longer, so adjust the time accordingly
-      const simulationTime = useAI ? 8000 : 3000;
+      const simulationTime = useAI && !skipAI ? 8000 : 3000;
       
       // Simulate progress while generating the itinerary
       await simulateProgress(setLoadingProgress, simulationTime);
       
-      // Fetch itinerary data
-      await refetchItinerary();
-      setShowItinerary(true);
+      // Prepare the endpoint with proper flags
+      const endpoint = `/api/itinerary?city=${selectedCity}&days=${days}${
+        useAI && !skipAI ? '&useAI=true' : ''
+      }${skipAI ? '&skipAI=true' : ''}`;
+      
+      // Manual fetch to better handle errors
+      const response = await fetch(endpoint);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Check if this is a quota error
+        if (response.status === 429 || (errorData.error && errorData.error.includes('quota'))) {
+          setSkipAI(true); // Mark to skip AI for future requests
+          
+          toast({
+            title: "AI Service at Capacity",
+            description: "We're using pre-built itineraries instead. You can still enjoy great travel recommendations!",
+            variant: "default"
+          });
+          
+          // Try again immediately with skipAI=true
+          const fallbackResponse = await fetch(`/api/itinerary?city=${selectedCity}&days=${days}&skipAI=true`);
+          
+          if (!fallbackResponse.ok) {
+            throw new Error("Failed to load pre-built itinerary");
+          }
+          
+          const data = await fallbackResponse.json();
+          setItinerary(data);
+          setShowItinerary(true);
+        } else {
+          throw new Error(errorData.message || "Failed to generate itinerary");
+        }
+      } else {
+        const data = await response.json();
+        
+        // Check if we got a fallback response
+        if (data._fallback) {
+          toast({
+            title: "Using Pre-built Itinerary",
+            description: data._fallbackReason || "AI-generated content unavailable",
+            variant: "default"
+          });
+          setSkipAI(true);
+        }
+        
+        setItinerary(data);
+        setShowItinerary(true);
+      }
       
       // Scroll to itinerary section
       document.getElementById('itinerary')?.scrollIntoView({ behavior: 'smooth' });
     } catch (error: any) {
+      console.error("Error generating itinerary:", error);
       toast({
         title: "Failed to generate itinerary",
         description: error.message || "Please try again or select a different city.",

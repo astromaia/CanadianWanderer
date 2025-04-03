@@ -81,7 +81,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!itinerary || useAI === 'true') {
         console.log(`Generating AI itinerary for ${cityData.name} (${days} days)`);
         
+        // Always try to get stored itinerary first as a backup
+        const storedItinerary = await storage.getItinerary(citySlug, days);
+        
         try {
+          // Check if we're dealing with quota exceeded error
+          if (req.query.skipAI === 'true') {
+            throw new Error('AI generation skipped due to quota limitations');
+          }
+          
           const generatedItinerary = await generateItinerary(
             cityData.name,
             cityData.description,
@@ -113,15 +121,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (error: any) {
           console.error("Error generating AI itinerary:", error);
           
+          // Check if error is related to quota limits
+          const isQuotaError = error.message && (
+            error.message.includes('quota') || 
+            error.message.includes('rate limit') ||
+            error.message.includes('429')
+          );
+          
           // If we have a stored itinerary, return that as fallback
-          if (itinerary) {
+          if (storedItinerary) {
             console.log("Falling back to stored itinerary");
-            return res.json(itinerary);
+            
+            // Add a flag to the response to indicate we're using a fallback
+            return res.json({
+              ...storedItinerary,
+              _fallback: true,
+              _fallbackReason: isQuotaError ? 
+                "AI quota exceeded, using pre-built itinerary instead" : 
+                "Error generating AI itinerary, using pre-built itinerary instead"
+            });
+          }
+          
+          // Special error message for quota issues
+          if (isQuotaError) {
+            return res.status(429).json({
+              message: "Our AI service is currently at capacity. Please try again later or use pre-built itineraries.",
+              error: "AI quota exceeded",
+              useStoredItinerary: true
+            });
           }
           
           return res.status(500).json({ 
             message: "Failed to generate itinerary with AI",
-            error: error.message || String(error)
+            error: error.message || String(error),
+            useStoredItinerary: true
           });
         }
       }

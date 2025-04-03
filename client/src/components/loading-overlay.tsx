@@ -14,7 +14,7 @@ export default function LoadingOverlay({
   isOpen, 
   progress,
   cityName,
-  isAI = true
+  isAI = false
 }: LoadingOverlayProps) {
   const [statusMessage, setStatusMessage] = useState("Initializing itinerary generation...");
   
