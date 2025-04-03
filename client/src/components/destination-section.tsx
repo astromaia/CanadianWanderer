@@ -133,6 +133,15 @@ export default function DestinationSection({
                       </>
                     )}
                   </ul>
+                  <div className="mt-4">
+                    <Button
+                      variant="default"
+                      onClick={() => handleCityCardClick(city.slug)}
+                      className="w-full text-white bg-[#000080] hover:bg-[#000066]"
+                    >
+                      Get Started
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))
@@ -143,7 +152,7 @@ export default function DestinationSection({
               {searchQuery && (
                 <Button 
                   variant="default" 
-                  className="mt-4 bg-primary hover:bg-primary-dark text-white"
+                  className="mt-4 bg-[#000080] hover:bg-[#000066] text-white"
                   onClick={() => onSearchChange?.("")}
                 >
                   Clear Search
@@ -159,35 +168,38 @@ export default function DestinationSection({
             <div className="w-full md:w-1/2">
               <label htmlFor="selected-destination" className="block text-neutral-dark font-medium mb-2">Selected Destination</label>
               <div className="relative">
-                <div className="relative">
-                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                    <Search className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <Input 
-                    type="text"
-                    placeholder="Search or select a city..."
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    className="ps-10 py-3"
-                  />
+                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
                 </div>
-                <Select value={selectedCity} onValueChange={onCitySelect}>
-                  <SelectTrigger className="w-full mt-2 bg-white">
-                    <SelectValue placeholder="Select a city" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {/* Use all cities for dropdown if available, otherwise use featured cities */}
+                <Input 
+                  type="text"
+                  placeholder="Search for any Canadian city..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="ps-10 py-3"
+                />
+                {searchQuery && searchQuery.length > 1 && (
+                  <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10 max-h-[300px] overflow-y-auto">
                     {(allCities || cities)
                       .sort((a, b) => a.name.localeCompare(b.name))
-                      .filter(city => !searchQuery || city.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .filter(city => city.name.toLowerCase().includes(searchQuery.toLowerCase()))
                       .map((city) => (
-                        <SelectItem key={city.id} value={city.slug}>
+                        <div 
+                          key={city.id} 
+                          className="p-2 hover:bg-neutral-lightest cursor-pointer"
+                          onClick={() => onCitySelect(city.slug)}
+                        >
                           {city.name}
-                        </SelectItem>
+                        </div>
                       ))
                     }
-                  </SelectContent>
-                </Select>
+                    {(allCities || cities).filter(city => 
+                      city.name.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).length === 0 && (
+                      <div className="p-2 text-neutral-muted">No cities found. Try a different search term.</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             
@@ -205,7 +217,7 @@ export default function DestinationSection({
                     size="icon" 
                     onClick={handleDaysDecrease}
                     disabled={days <= 1}
-                    className="rounded-r-none bg-primary text-white hover:bg-primary-dark"
+                    className="rounded-r-none bg-[#000080] text-white hover:bg-[#000066]"
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
@@ -217,7 +229,7 @@ export default function DestinationSection({
                     size="icon" 
                     onClick={handleDaysIncrease}
                     disabled={days >= 7}
-                    className="rounded-l-none bg-primary text-white hover:bg-primary-dark"
+                    className="rounded-l-none bg-[#000080] text-white hover:bg-[#000066]"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -248,7 +260,7 @@ export default function DestinationSection({
             <Button 
               onClick={onGenerateItinerary} 
               disabled={!selectedCity}
-              className="bg-primary hover:bg-primary-dark text-white"
+              className="bg-[#000080] hover:bg-[#000066] text-white"
               size="lg"
             >
               <Calendar className="mr-2 h-5 w-5" /> Generate Itinerary
