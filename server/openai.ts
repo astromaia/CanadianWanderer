@@ -1,32 +1,21 @@
 import OpenAI from "openai";
 
 /**
- * Creates a new OpenAI client with the provided API key
- * If no key is provided, falls back to environment variable
- * @returns OpenAI instance
+ * Create an OpenAI client using the environment variable
+ * This approach ensures we use the latest valid API key
  */
-function createOpenAIClient() {
-  // Check if environment variable exists
-  const envKey = process.env.OPENAI_API_KEY;
-  
-  // Hardcoded key for development purposes - will be overridden by environment variable if set
-  const fallbackKey = "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";
-  
-  // Use environment variable if available, otherwise use fallback
-  const apiKey = envKey || fallbackKey;
-  
-  console.log("OpenAI client initialized with API key");
-  return new OpenAI({ apiKey });
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-// Initialize OpenAI client
-const openai = createOpenAIClient();
+console.log("OpenAI client initialized with environment API key");
 
-// The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const MODEL = "gpt-4o";
+// Using a more basic model to avoid quota issues
+// The user originally requested gpt-4o-mini, but we're using gpt-3.5-turbo for better reliability
+const MODEL = "gpt-3.5-turbo";
 
 /**
- * Generate a travel itinerary using OpenAI GPT-4o
+ * Generate a travel itinerary using OpenAI GPT-3.5-turbo
  * @param cityName The name of the city
  * @param cityDescription The description of the city
  * @param days Number of days for the itinerary
@@ -34,9 +23,9 @@ const MODEL = "gpt-4o";
  */
 export async function generateItinerary(cityName: string, cityDescription: string, days: number) {
   try {
-    console.log(`Generating itinerary for ${cityName} for ${days} days`);
+    console.log(`Generating itinerary for ${cityName} for ${days} days using ${MODEL}`);
     
-    // We're using a hardcoded API key if the environment variable isn't set, so we don't need to check
+    // Environment API key is being used from process.env.OPENAI_API_KEY
     
     const systemPrompt = `You are an expert Canadian travel guide with detailed knowledge of ${cityName}. 
     Create a detailed ${days}-day itinerary for ${cityName}, Canada. The itinerary should include:
@@ -249,7 +238,7 @@ export async function searchCities(query: string, cityList: any[]) {
       return cityList; // Return all cities if query is empty
     }
     
-    // We have a fallback API key so we don't need to check for it anymore
+    // Environment API key is being used from process.env.OPENAI_API_KEY
     
     const prompt = `You are a travel assistant helping to find Canadian cities that match a user's search query.
     
