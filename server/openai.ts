@@ -29,45 +29,57 @@ export async function generateItinerary(cityName: string, cityDescription: strin
     // Environment API key is being used from process.env.OPENAI_API_KEY
     
     const systemPrompt = `You are an expert Canadian travel guide with detailed knowledge of ${cityName}, Canada. 
-    Create a detailed ${days}-day itinerary for ${cityName}, focusing exclusively on authentic Canadian experiences. The itinerary should include:
+    Create a detailed ${days}-day itinerary for ${cityName}, focusing exclusively on authentic Canadian experiences with HIGHLY SPECIFIC details. The itinerary should include:
     
     For each day:
     1. A catchy title for the day's theme that captures the essence of Canadian culture or local highlights
-    2. Three activities divided into morning, afternoon, and evening
+    2. Exactly three activities divided into morning, afternoon, and evening
     3. For each activity provide:
        - A title prefixed with "Morning:", "Afternoon:", or "Evening:" that's specific and descriptive
        - Realistic start and end times considering Canadian business hours
        - Duration that makes sense for the activity
-       - Detailed description of the activity highlighting Canadian significance
-       - Specific location with actual street names or neighborhoods in ${cityName}
-       - Approximate cost in CAD with realistic price ranges
-       - A helpful traveler tip related to that specific activity, location, or Canadian cultural norms
+       - HIGHLY DETAILED description (at least 60 words) of the activity highlighting Canadian significance
+       - SPECIFIC location with ACTUAL street addresses, building names, and neighborhoods in ${cityName}
+       - PRECISE cost in CAD with realistic price ranges (e.g., "$25-30 CAD per person" not just "Varies")
+       - A detailed and helpful traveler tip related to that specific activity, location, or Canadian cultural norms
     
     Use this city description for context: ${cityDescription}
     
     Important guidelines:
-    - Make all recommendations realistic, specific to ${cityName}, and focus on Canadian culture, nature, and local highlights
+    - Make ALL recommendations realistic, specific to ${cityName}, and focus on Canadian culture, nature, and local highlights
     - Include a mix of popular attractions and hidden gems only locals would know
-    - Recommend authentic Canadian cuisine and local dining experiences
+    - Recommend authentic Canadian cuisine and local dining experiences with SPECIFIC restaurant names and dishes
     - Include seasonal activities appropriate for the time of year
     - Ensure activities logically flow and consider travel time between locations using local transit options
     - Highlight Canadian cultural nuances, etiquette, and local customs where relevant
     - For multi-day itineraries, ensure each day has a distinct theme or focus area within ${cityName}
+    - NEVER use generic descriptions like "downtown area" or "central district" - always provide specific street names, intersections, or landmarks
+    - NEVER use generic costs like "Free" or "Varies" without explanation - always provide specific price ranges or explain what affects the cost
     
-    Your itinerary should feel like it was created by a local Canadian who deeply understands the culture and attractions of ${cityName}.`;
+    Your itinerary should feel like it was created by a local Canadian who deeply understands the culture and attractions of ${cityName}, with insider knowledge that tourists wouldn't typically have.`;
 
-    const userPrompt = `Please create a detailed ${days}-day travel itinerary for ${cityName}, Canada, focusing on authentic Canadian experiences. 
+    const userPrompt = `Please create a highly detailed ${days}-day travel itinerary for ${cityName}, Canada, focusing on authentic Canadian experiences with SPECIFIC details for all activities. 
     
-    I'd like a comprehensive day-by-day plan that includes:
-    - Morning activities starting around 8-9am
-    - Afternoon activities that showcase the best of ${cityName}
-    - Evening activities including dining at local Canadian restaurants
-    - Specific locations with addresses or neighborhoods
-    - Realistic cost estimates in Canadian dollars
-    - Local transportation options between activities
-    - Insider tips that only locals would know
+    I need a comprehensive day-by-day plan that includes:
+    - Morning activities starting around 8-9am with EXACT addresses and locations
+    - Afternoon activities that showcase the best of ${cityName} with SPECIFIC venue names
+    - Evening activities including dining at LOCAL Canadian restaurants with ACTUAL restaurant names
+    - PRECISE street addresses and locations for every attraction and activity
+    - DETAILED cost estimates in Canadian dollars with specific price ranges
+    - Local transportation options between activities with route numbers and stop names
+    - SPECIFIC and insightful insider tips that only locals would know
     
-    Please make this itinerary specific to ${cityName} with activities that are uniquely Canadian and highlight the city's cultural and natural attractions. Include both popular must-see destinations and hidden gems.`;
+    Please make this itinerary EXTREMELY detailed and specific to ${cityName}. I need activities that are uniquely Canadian and highlight the city's cultural and natural attractions. Include both popular tourist destinations and authentic hidden gems that locals frequent.
+    
+    Remember to provide EXACT:
+    - Street addresses
+    - Attraction and restaurant names
+    - Opening hours
+    - Cost details
+    - Neighborhood names
+    - Travel instructions between locations
+    
+    I want this itinerary to feel like it was created by a local Canadian expert with deep knowledge of ${cityName}.`;
 
     try {
       const response = await openai.chat.completions.create({
@@ -137,14 +149,16 @@ export async function generateItinerary(cityName: string, cityDescription: strin
       
       Important conversion rules:
       1. Extract information from the original text to populate each field accurately
-      2. Keep all costs in CAD (Canadian dollars) format
-      3. Make sure every "title" field for activities begins with either "Morning:", "Afternoon:", or "Evening:"
-      4. Extract actual addresses, neighborhoods, or specific locations from the text
+      2. Keep all costs in CAD (Canadian dollars) format with SPECIFIC price ranges (e.g., "$25-30 CAD" or "$15 CAD per person")
+      3. Make sure every "title" field for activities begins with either "Morning:", "Afternoon:", or "Evening:" followed by specific activity name
+      4. Extract EXACT addresses, neighborhoods, or specific locations from the text - never use generic terms like "downtown" without specific street names
       5. Each day must have exactly 3 activities (morning, afternoon, evening)
       6. Day titles should be descriptive and reflect the theme of activities for that day
-      7. Make sure all tipTitle and tipDescription fields contain helpful, practical traveler advice
+      7. Make sure all tipTitle and tipDescription fields contain helpful, practical traveler advice that provides insider knowledge
       8. Each day's activities should have sequential IDs starting from (dayNumber-1)*3+1
-      9. If the exact information isn't available in the text, use the most reasonable inference based on the content
+      9. Description fields should be HIGHLY DETAILED (at least 60 words) with specific Canadian cultural significance
+      10. If the exact information isn't available, use reasonable inferences based on the content but always maintain SPECIFICITY with exact locations and prices
+      11. NEVER use generic costs like "Free" or "Varies" without explanation - always provide specific price ranges or explain what affects the cost
       
       Original itinerary text:
       ${itineraryText}`;
@@ -178,36 +192,36 @@ export async function generateItinerary(cityName: string, cityDescription: strin
                   startTime: "9:00 AM",
                   endTime: "12:00 PM",
                   duration: "3 hours",
-                  title: `Morning: Exploring ${cityName}`,
-                  description: "Explore the main attractions in the morning.",
-                  location: `${cityName} downtown area`,
-                  cost: "Varies",
-                  tipTitle: "Morning Tip",
-                  tipDescription: "Start early to avoid crowds."
+                  title: `Morning: Exploring ${cityName}'s Main Attractions`,
+                  description: `Begin your morning with a visit to the iconic landmarks of ${cityName}. Take your time to explore the architecture, cultural significance, and historical importance of these notable sites. Many visitors find the morning hours ideal for photography and enjoying the attractions before the midday crowds arrive. The experience offers a perfect introduction to the city's character and layout.`,
+                  location: `${cityName} City Centre, Main Tourist District`,
+                  cost: "$10-25 CAD per person for attraction entry fees",
+                  tipTitle: "Morning Visitor Advantage",
+                  tipDescription: "Start early around 9 AM to beat the crowds and enjoy shorter lines. Most attractions open at 9 AM, and early morning offers the best lighting for photography."
                 },
                 {
                   id: i * 3 + 2,
                   startTime: "1:00 PM",
                   endTime: "4:00 PM",
                   duration: "3 hours",
-                  title: `Afternoon: ${cityName} Activities`,
-                  description: `Enjoy the afternoon in ${cityName}.`,
-                  location: `${cityName} central area`,
-                  cost: "Varies",
-                  tipTitle: "Afternoon Tip",
-                  tipDescription: "Check local restaurants for lunch specials."
+                  title: `Afternoon: Cultural Experience in ${cityName}`,
+                  description: `Spend your afternoon immersing yourself in the cultural offerings of ${cityName}. Whether it's visiting museums, cultural centers, or local markets, this is your chance to connect with the authentic side of the city. The afternoon provides ample time to explore indoor venues and engage with local artisans and performers showcasing Canadian heritage.`,
+                  location: `Cultural District, Arts Centre Area`,
+                  cost: "$15-30 CAD for museum entry and local experiences",
+                  tipTitle: "Local Transportation Insight",
+                  tipDescription: "Use public transportation to navigate between attractions. Purchase a day pass for approximately $10 CAD which provides unlimited travel and is more economical than individual tickets."
                 },
                 {
                   id: i * 3 + 3,
                   startTime: "6:00 PM",
                   endTime: "9:00 PM", 
                   duration: "3 hours",
-                  title: `Evening: ${cityName} Nightlife`,
-                  description: `Experience the evening in ${cityName}.`,
-                  location: `${cityName} entertainment district`,
-                  cost: "Varies",
-                  tipTitle: "Evening Tip",
-                  tipDescription: "Book restaurants in advance for dinner."
+                  title: `Evening: Dining and Entertainment in ${cityName}`,
+                  description: `Conclude your day with a delightful culinary experience at one of ${cityName}'s renowned restaurants. The evening atmosphere comes alive with locals and visitors enjoying the city's nightlife. Canadian cuisine offers a diverse range of options from seafood to multicultural influences, reflecting the country's rich heritage and innovation in gastronomy.`,
+                  location: `Entertainment District, Restaurant Row`,
+                  cost: "$25-50 CAD per person for dinner, excluding drinks",
+                  tipTitle: "Dining Reservation Strategy",
+                  tipDescription: "Make reservations at popular restaurants at least 1-2 days in advance, especially for weekend dining. Request a table by the window for scenic views if available."
                 }
               ]
             });
@@ -229,36 +243,36 @@ export async function generateItinerary(cityName: string, cityDescription: strin
                 startTime: "9:00 AM",
                 endTime: "12:00 PM",
                 duration: "3 hours",
-                title: `Morning: Exploring ${cityName}`,
-                description: "Explore the main attractions in the morning.",
-                location: `${cityName} downtown area`,
-                cost: "Varies",
-                tipTitle: "Morning Tip",
-                tipDescription: "Start early to avoid crowds."
+                title: `Morning: Exploring ${cityName}'s Main Attractions`,
+                description: `Begin your morning with a visit to the iconic landmarks of ${cityName}. Take your time to explore the architecture, cultural significance, and historical importance of these notable sites. Many visitors find the morning hours ideal for photography and enjoying the attractions before the midday crowds arrive. The experience offers a perfect introduction to the city's character and layout.`,
+                location: `${cityName} City Centre, Main Tourist District`,
+                cost: "$10-25 CAD per person for attraction entry fees",
+                tipTitle: "Morning Visitor Advantage",
+                tipDescription: "Start early around 9 AM to beat the crowds and enjoy shorter lines. Most attractions open at 9 AM, and early morning offers the best lighting for photography."
               },
               {
                 id: i * 3 + 2,
                 startTime: "1:00 PM",
                 endTime: "4:00 PM",
                 duration: "3 hours",
-                title: `Afternoon: ${cityName} Activities`,
-                description: `Enjoy the afternoon in ${cityName}.`,
-                location: `${cityName} central area`,
-                cost: "Varies",
-                tipTitle: "Afternoon Tip",
-                tipDescription: "Check local restaurants for lunch specials."
+                title: `Afternoon: Cultural Experience in ${cityName}`,
+                description: `Spend your afternoon immersing yourself in the cultural offerings of ${cityName}. Whether it's visiting museums, cultural centers, or local markets, this is your chance to connect with the authentic side of the city. The afternoon provides ample time to explore indoor venues and engage with local artisans and performers showcasing Canadian heritage.`,
+                location: `Cultural District, Arts Centre Area`,
+                cost: "$15-30 CAD for museum entry and local experiences",
+                tipTitle: "Local Transportation Insight",
+                tipDescription: "Use public transportation to navigate between attractions. Purchase a day pass for approximately $10 CAD which provides unlimited travel and is more economical than individual tickets."
               },
               {
                 id: i * 3 + 3,
                 startTime: "6:00 PM",
                 endTime: "9:00 PM", 
                 duration: "3 hours",
-                title: `Evening: ${cityName} Nightlife`,
-                description: `Experience the evening in ${cityName}.`,
-                location: `${cityName} entertainment district`,
-                cost: "Varies",
-                tipTitle: "Evening Tip",
-                tipDescription: "Book restaurants in advance for dinner."
+                title: `Evening: Dining and Entertainment in ${cityName}`,
+                description: `Conclude your day with a delightful culinary experience at one of ${cityName}'s renowned restaurants. The evening atmosphere comes alive with locals and visitors enjoying the city's nightlife. Canadian cuisine offers a diverse range of options from seafood to multicultural influences, reflecting the country's rich heritage and innovation in gastronomy.`,
+                location: `Entertainment District, Restaurant Row`,
+                cost: "$25-50 CAD per person for dinner, excluding drinks",
+                tipTitle: "Dining Reservation Strategy",
+                tipDescription: "Make reservations at popular restaurants at least 1-2 days in advance, especially for weekend dining. Request a table by the window for scenic views if available."
               }
             ]
           }))
