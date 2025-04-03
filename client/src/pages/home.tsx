@@ -21,7 +21,7 @@ export default function Home() {
   const { toast } = useToast();
   
   // Fetch cities for destination selection, with optional search query
-  const { data: cities, refetch: refetchCities } = useQuery({
+  const { data: allCities, refetch: refetchCities } = useQuery({
     queryKey: ['/api/cities', searchQuery],
     queryFn: async () => {
       const endpoint = searchQuery 
@@ -34,6 +34,15 @@ export default function Home() {
       return response.json();
     },
   });
+  
+  // Filter to just get 3 featured cities for display (Toronto, Vancouver, Montreal)
+  // But keep the full list for dropdown selection
+  const cities = allCities && (searchQuery 
+    ? allCities.slice(0, 3)  // For search results, just show top 3
+    : allCities.filter((city: {slug: string}) => 
+        ['toronto', 'vancouver', 'montreal'].includes(city.slug)
+      ).slice(0, 3)  // Show only the three main cities when not searching
+  );
   
   // State for storing the itinerary
   const [itinerary, setItinerary] = useState<CompleteItinerary | null>(null);
@@ -199,6 +208,7 @@ export default function Home() {
         onSearchChange={setSearchQuery}
         onAIToggle={setUseAI}
         onGenerateItinerary={handleGenerateItinerary}
+        allCities={allCities}
       />
       
       {showItinerary && itinerary && (

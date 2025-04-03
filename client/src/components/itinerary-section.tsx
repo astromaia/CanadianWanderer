@@ -78,7 +78,7 @@ export default function ItinerarySection({
                       <div className="bg-primary-light text-white rounded-full p-2 mr-4 mt-1">
                         <Clock className="h-4 w-4" />
                       </div>
-                      <div>
+                      <div className="w-full">
                         <div className="flex items-center mb-2">
                           <span className="text-neutral-medium text-sm font-medium">
                             {activity.startTime} - {activity.endTime}
@@ -88,9 +88,93 @@ export default function ItinerarySection({
                           </span>
                         </div>
                         <h4 className="font-semibold text-xl text-primary-dark mb-2">{activity.title}</h4>
-                        <p className="text-neutral-dark mb-3">
-                          {activity.description}
-                        </p>
+                        
+                        {/* Activity with image */}
+                        <div className="flex flex-col md:flex-row gap-4 mb-3">
+                          {/* Add image based on activity title keywords */}
+                          {(activity.title.toLowerCase().includes('cn tower') || 
+                            activity.title.toLowerCase().includes('landmark')) && (
+                            <div className="w-full md:w-1/3 h-40 rounded-lg overflow-hidden">
+                              <img 
+                                src="https://images.unsplash.com/photo-1503556567555-53e8b1705c19?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                                alt="CN Tower" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          {(activity.title.toLowerCase().includes('park') || 
+                            activity.title.toLowerCase().includes('nature') ||
+                            activity.title.toLowerCase().includes('outdoor')) && (
+                            <div className="w-full md:w-1/3 h-40 rounded-lg overflow-hidden">
+                              <img 
+                                src="https://images.unsplash.com/photo-1610400906066-4380a165db9b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                                alt="Park" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          {(activity.title.toLowerCase().includes('museum') || 
+                            activity.title.toLowerCase().includes('gallery') ||
+                            activity.title.toLowerCase().includes('art')) && (
+                            <div className="w-full md:w-1/3 h-40 rounded-lg overflow-hidden">
+                              <img 
+                                src="https://images.unsplash.com/photo-1553522399-ce7533c598c2?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                                alt="Museum" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          {(activity.title.toLowerCase().includes('dinner') || 
+                            activity.title.toLowerCase().includes('lunch') ||
+                            activity.title.toLowerCase().includes('breakfast') ||
+                            activity.title.toLowerCase().includes('restaurant') ||
+                            activity.title.toLowerCase().includes('food')) && (
+                            <div className="w-full md:w-1/3 h-40 rounded-lg overflow-hidden">
+                              <img 
+                                src="https://images.unsplash.com/photo-1544148103-0773bf10d330?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                                alt="Restaurant" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          {(activity.title.toLowerCase().includes('shopping') || 
+                            activity.title.toLowerCase().includes('market') ||
+                            activity.title.toLowerCase().includes('store')) && (
+                            <div className="w-full md:w-1/3 h-40 rounded-lg overflow-hidden">
+                              <img 
+                                src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                                alt="Market" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          <div className={`${(activity.title.toLowerCase().includes('cn tower') || 
+                                          activity.title.toLowerCase().includes('landmark') ||
+                                          activity.title.toLowerCase().includes('park') || 
+                                          activity.title.toLowerCase().includes('nature') ||
+                                          activity.title.toLowerCase().includes('outdoor') ||
+                                          activity.title.toLowerCase().includes('museum') || 
+                                          activity.title.toLowerCase().includes('gallery') ||
+                                          activity.title.toLowerCase().includes('art') ||
+                                          activity.title.toLowerCase().includes('dinner') || 
+                                          activity.title.toLowerCase().includes('lunch') ||
+                                          activity.title.toLowerCase().includes('breakfast') ||
+                                          activity.title.toLowerCase().includes('restaurant') ||
+                                          activity.title.toLowerCase().includes('food') ||
+                                          activity.title.toLowerCase().includes('shopping') || 
+                                          activity.title.toLowerCase().includes('market') ||
+                                          activity.title.toLowerCase().includes('store')) ? 'w-full md:w-2/3' : 'w-full'}`}>
+                            <p className="text-neutral-dark">
+                              {activity.description}
+                            </p>
+                          </div>
+                        </div>
+                        
                         <div className="flex flex-wrap gap-2 mb-4">
                           {activity.location && (
                             <span className="bg-neutral-lightest px-3 py-1 rounded-full text-sm text-neutral-dark flex items-center">
@@ -130,7 +214,7 @@ export default function ItinerarySection({
           </Button>
           <Button 
             variant="outline"
-            className="border-primary text-primary"
+            className="border-primary text-primary hover:bg-primary hover:text-white"
             onClick={onEditItinerary}
           >
             <Edit className="mr-2 h-4 w-4" /> Edit Itinerary

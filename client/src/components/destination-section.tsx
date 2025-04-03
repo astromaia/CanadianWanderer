@@ -19,6 +19,7 @@ interface DestinationSectionProps {
   onSearchChange?: (query: string) => void;
   onAIToggle?: (useAI: boolean) => void;
   onGenerateItinerary: () => void;
+  allCities?: City[];  // Full list of all cities for the dropdown
 }
 
 export default function DestinationSection({
@@ -31,7 +32,8 @@ export default function DestinationSection({
   onDaysChange,
   onSearchChange,
   onAIToggle,
-  onGenerateItinerary
+  onGenerateItinerary,
+  allCities
 }: DestinationSectionProps) {
   const handleCityCardClick = (slug: string) => {
     onCitySelect(slug);
@@ -97,16 +99,46 @@ export default function DestinationSection({
                 onClick={() => handleCityCardClick(city.slug)}
               >
                 <div 
-                  className="h-56 bg-cover bg-center relative"
+                  className="h-64 bg-cover bg-center relative"
                   style={{ backgroundImage: `url(${city.imageUrl})` }}
                 >
-                  <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/70 group-hover:from-black/5 group-hover:to-black/60 transition-all duration-300"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="font-semibold text-white text-2xl">{city.name}</h3>
+                    <h3 className="font-semibold text-white text-2xl drop-shadow-md">{city.name}</h3>
                   </div>
                 </div>
                 <div className="p-4 bg-white">
-                  <p className="text-neutral-dark">{city.description}</p>
+                  <p className="text-neutral-dark mb-3">{city.description}</p>
+                  <h4 className="font-medium text-primary text-sm mb-2">Top 5 Attractions:</h4>
+                  <ul className="text-sm text-neutral-dark space-y-1">
+                    {city.slug === 'toronto' && (
+                      <>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>CN Tower</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Royal Ontario Museum</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Ripley's Aquarium</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Toronto Islands</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Distillery District</li>
+                      </>
+                    )}
+                    {city.slug === 'vancouver' && (
+                      <>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Stanley Park</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Granville Island</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Capilano Suspension Bridge</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Gastown</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Grouse Mountain</li>
+                      </>
+                    )}
+                    {city.slug === 'montreal' && (
+                      <>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Old Montreal</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Mount Royal Park</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Notre-Dame Basilica</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Montreal Biodome</li>
+                        <li className="flex items-center"><span className="w-1 h-1 rounded-full bg-primary mr-2"></span>Jean-Talon Market</li>
+                      </>
+                    )}
+                  </ul>
                 </div>
               </div>
             ))
@@ -137,7 +169,8 @@ export default function DestinationSection({
                   <SelectValue placeholder="Select a city" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.map((city) => (
+                  {/* Use all cities for dropdown if available, otherwise use featured cities */}
+                  {(allCities || cities).sort((a, b) => a.name.localeCompare(b.name)).map((city) => (
                     <SelectItem key={city.id} value={city.slug}>
                       {city.name}
                     </SelectItem>
@@ -196,7 +229,7 @@ export default function DestinationSection({
             <Button 
               onClick={onGenerateItinerary} 
               disabled={!selectedCity}
-              className="bg-secondary hover:bg-secondary-dark text-white"
+              className="bg-primary hover:bg-primary-dark text-white"
               size="lg"
             >
               <Calendar className="mr-2 h-5 w-5" /> Generate Itinerary
