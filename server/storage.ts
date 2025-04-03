@@ -100,6 +100,13 @@ export class MemStorage implements IStorage {
       imageUrl: "https://images.unsplash.com/photo-1588732570005-5012ee9c0224?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
     });
     
+    const calgary = this.createCity({
+      name: "Calgary",
+      slug: "calgary",
+      description: "Experience the vibrant city at the gateway to the Rocky Mountains, with its blend of western heritage and modern urban energy.",
+      imageUrl: "https://images.unsplash.com/photo-1558559332-ee0cd8f22cf0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+    });
+    
     // Create Toronto attractions
     const cnTower = this.createAttraction({
       cityId: toronto.id,
@@ -358,6 +365,216 @@ export class MemStorage implements IStorage {
     });
     
     // More attractions and itinerary items would be added for each city...
+    
+    // Calgary attractions and itinerary
+    const calgarySkyline = this.createAttraction({
+      cityId: calgary.id,
+      name: "Calgary Tower",
+      description: "Start your morning with panoramic views of the city and the Rocky Mountains from the observation deck of this iconic 191-meter tower, featuring a glass floor experience for the brave-hearted.",
+      location: "101 9 Ave SW",
+      cost: "$18 CAD per person",
+      tipTitle: "Morning Activity Tip",
+      tipDescription: "Visit early in the morning to avoid crowds and get the best lighting for photos. The revolving restaurant is a great option for breakfast with a view."
+    });
+    
+    const stampedePark = this.createAttraction({
+      cityId: calgary.id,
+      name: "Stampede Park & Heritage Park",
+      description: "Explore Calgary's famous Stampede grounds and learn about the city's western heritage. If visiting in July, experience the world-renowned Calgary Stampede festival, otherwise enjoy the year-round exhibitions.",
+      location: "1410 Olympic Way SE",
+      cost: "$15-90 CAD depending on events",
+      tipTitle: "Afternoon Activity Tip",
+      tipDescription: "Check the Stampede website for special events happening during your visit. The park offers different experiences throughout the year."
+    });
+    
+    const stephenAve = this.createAttraction({
+      cityId: calgary.id,
+      name: "Stephen Avenue Walk",
+      description: "End your day on this vibrant pedestrian mall in downtown Calgary, featuring historic buildings, shops, restaurants, pubs, and cafes. Enjoy evening entertainment and bustling nightlife.",
+      location: "Stephen Avenue between 2 St SW and 3 St SE",
+      cost: "Free (dining and shopping extra)",
+      tipTitle: "Evening Activity Tip",
+      tipDescription: "Many restaurants offer happy hour specials in the early evening. The area is particularly lively Thursday through Saturday nights."
+    });
+    
+    const princesIsland = this.createAttraction({
+      cityId: calgary.id,
+      name: "Prince's Island Park",
+      description: "Take a morning stroll through this urban park on an island in the Bow River. Enjoy walking paths, outdoor sculptures, and beautifully landscaped gardens.",
+      location: "698 Eau Claire Ave SW",
+      cost: "Free",
+      tipTitle: "Morning Activity Tip",
+      tipDescription: "The River Café on the island offers one of the city's best brunch experiences, with seasonal and locally-sourced ingredients."
+    });
+    
+    const glenbow = this.createAttraction({
+      cityId: calgary.id,
+      name: "Glenbow Museum",
+      description: "Spend your afternoon exploring Western Canadian history, art, and culture at this comprehensive museum. The Glenbow houses over a million artifacts in its collection.",
+      location: "130 9 Ave SE",
+      cost: "$16 CAD per person",
+      tipTitle: "Afternoon Activity Tip",
+      tipDescription: "Check for special exhibitions. The museum is free to enter on the first Thursday evening of each month from 5 pm to 9 pm."
+    });
+    
+    const kensington = this.createAttraction({
+      cityId: calgary.id,
+      name: "Kensington District Nightlife",
+      description: "Experience Calgary's trendy Kensington neighborhood in the evening, with its eclectic mix of pubs, cocktail bars, and restaurants. Perfect for dinner and evening entertainment.",
+      location: "Kensington Road and 10 St NW",
+      cost: "$15-50 CAD for dinner",
+      tipTitle: "Evening Activity Tip",
+      tipDescription: "Container Bar is a popular local spot for cocktails, while Hayden Block offers excellent southern-style BBQ and whiskey."
+    });
+    
+    const zooYard = this.createAttraction({
+      cityId: calgary.id,
+      name: "Calgary Zoo & Studio Bell",
+      description: "Combine a morning visit to the acclaimed Calgary Zoo, home to nearly 1,000 animals, followed by exploring Studio Bell, National Music Centre with its interactive exhibits and impressive instrument collection.",
+      location: "210 St. Georges Drive NE (Zoo)",
+      cost: "$29 CAD for zoo, $18 CAD for Studio Bell",
+      tipTitle: "Morning Activity Tip",
+      tipDescription: "The Canadian Wilds and Panda Passage exhibits at the zoo are highlights. Allocate at least 3 hours for a proper zoo experience."
+    });
+    
+    const winsport = this.createAttraction({
+      cityId: calgary.id,
+      name: "WinSport Canada Olympic Park",
+      description: "Experience afternoon adventure at the 1988 Winter Olympics venue, offering skiing and snowboarding in winter, and mountain biking, mini-golf, and an extreme obstacle course in summer.",
+      location: "88 Canada Olympic Road SW",
+      cost: "$25-60 CAD depending on activities",
+      tipTitle: "Afternoon Activity Tip",
+      tipDescription: "The mountain biking trail system is excellent for beginners and intermediate riders. The zipline offers spectacular city views."
+    });
+    
+    const cowboyBar = this.createAttraction({
+      cityId: calgary.id,
+      name: "Cowboys Dance Hall & Casino",
+      description: "Experience authentic western nightlife at this famous Calgary establishment. Enjoy live country music, line dancing, and gaming at the adjacent casino for a quintessential Calgary evening.",
+      location: "421 12 Ave SE",
+      cost: "$10-20 CAD cover charge (varies by event)",
+      tipTitle: "Evening Activity Tip",
+      tipDescription: "Thursday night is usually industry night with cheaper drinks. Expect a more authentic experience during Stampede week in July."
+    });
+    
+    // Create Calgary day headers for 3 days
+    for (let day = 1; day <= 3; day++) {
+      let title;
+      switch (day) {
+        case 1: title = "Calgary's Urban Highlights"; break;
+        case 2: title = "Cultural Exploration & Nightlife"; break;
+        case 3: title = "Adventure & Entertainment"; break;
+        default: title = `Day ${day} in Calgary`;
+      }
+      
+      this.createDayHeader({
+        cityId: calgary.id,
+        dayNumber: day,
+        title
+      });
+    }
+    
+    // Create Calgary itinerary items for Day 1 (Morning, Afternoon, Evening)
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: calgarySkyline.id,
+      dayNumber: 1,
+      startTime: "9:00 AM",
+      endTime: "11:00 AM",
+      duration: "2 hours",
+      title: "Morning: Calgary Tower Experience",
+      sortOrder: 1
+    });
+    
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: stampedePark.id,
+      dayNumber: 1,
+      startTime: "12:00 PM",
+      endTime: "4:00 PM",
+      duration: "4 hours",
+      title: "Afternoon: Stampede Park & Heritage Park",
+      sortOrder: 2
+    });
+    
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: stephenAve.id,
+      dayNumber: 1,
+      startTime: "6:00 PM",
+      endTime: "10:00 PM",
+      duration: "4 hours",
+      title: "Evening: Stephen Avenue Dining & Entertainment",
+      sortOrder: 3
+    });
+    
+    // Create Calgary itinerary items for Day 2 (Morning, Afternoon, Evening)
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: princesIsland.id,
+      dayNumber: 2,
+      startTime: "9:00 AM",
+      endTime: "11:30 AM",
+      duration: "2.5 hours",
+      title: "Morning: Prince's Island Park Stroll & Brunch",
+      sortOrder: 1
+    });
+    
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: glenbow.id,
+      dayNumber: 2,
+      startTime: "1:00 PM",
+      endTime: "4:00 PM",
+      duration: "3 hours",
+      title: "Afternoon: Glenbow Museum Cultural Exploration",
+      sortOrder: 2
+    });
+    
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: kensington.id,
+      dayNumber: 2,
+      startTime: "6:00 PM",
+      endTime: "11:00 PM",
+      duration: "5 hours",
+      title: "Evening: Kensington District Dining & Nightlife",
+      sortOrder: 3
+    });
+    
+    // Create Calgary itinerary items for Day 3 (Morning, Afternoon, Evening)
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: zooYard.id,
+      dayNumber: 3,
+      startTime: "9:00 AM",
+      endTime: "12:30 PM",
+      duration: "3.5 hours",
+      title: "Morning: Calgary Zoo & Studio Bell",
+      sortOrder: 1
+    });
+    
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: winsport.id,
+      dayNumber: 3,
+      startTime: "1:30 PM",
+      endTime: "5:00 PM",
+      duration: "3.5 hours",
+      title: "Afternoon: WinSport Olympic Park Adventures",
+      sortOrder: 2
+    });
+    
+    this.createItineraryItem({
+      cityId: calgary.id,
+      attractionId: cowboyBar.id,
+      dayNumber: 3,
+      startTime: "8:00 PM",
+      endTime: "1:00 AM",
+      duration: "5 hours",
+      title: "Evening: Cowboys Dance Hall & Casino Nightlife",
+      sortOrder: 3
+    });
   }
   
   // City operations
