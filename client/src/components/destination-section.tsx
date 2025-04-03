@@ -37,6 +37,14 @@ export default function DestinationSection({
 }: DestinationSectionProps) {
   const handleCityCardClick = (slug: string) => {
     onCitySelect(slug);
+    
+    // Scroll to the trip duration section
+    setTimeout(() => {
+      document.getElementById('travel-duration')?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center' 
+      });
+    }, 100);
   };
   
   const handleDaysDecrease = () => {
@@ -71,20 +79,6 @@ export default function DestinationSection({
           <p className="text-lg text-neutral-dark max-w-2xl mx-auto">
             Select a Canadian city to explore and we'll create the perfect itinerary for your trip
           </p>
-        </div>
-        
-        {/* Search box */}
-        <div className="relative max-w-md mx-auto mb-8">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <Input
-            type="search"
-            placeholder="Search for a Canadian city or attraction..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="ps-10 py-6"
-          />
         </div>
         
         {/* Destination Cards */}
@@ -148,8 +142,8 @@ export default function DestinationSection({
               <p className="text-neutral-muted">Try another search term or browse all Canadian cities</p>
               {searchQuery && (
                 <Button 
-                  variant="outline" 
-                  className="mt-4"
+                  variant="default" 
+                  className="mt-4 bg-primary hover:bg-primary-dark text-white"
                   onClick={() => onSearchChange?.("")}
                 >
                   Clear Search
@@ -164,45 +158,70 @@ export default function DestinationSection({
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="w-full md:w-1/2">
               <label htmlFor="selected-destination" className="block text-neutral-dark font-medium mb-2">Selected Destination</label>
-              <Select value={selectedCity} onValueChange={onCitySelect}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a city" />
-                </SelectTrigger>
-                <SelectContent>
-                  {/* Use all cities for dropdown if available, otherwise use featured cities */}
-                  {(allCities || cities).sort((a, b) => a.name.localeCompare(b.name)).map((city) => (
-                    <SelectItem key={city.id} value={city.slug}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <div className="relative">
+                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <Input 
+                    type="text"
+                    placeholder="Search or select a city..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className="ps-10 py-3"
+                  />
+                </div>
+                <Select value={selectedCity} onValueChange={onCitySelect}>
+                  <SelectTrigger className="w-full mt-2 bg-white">
+                    <SelectValue placeholder="Select a city" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {/* Use all cities for dropdown if available, otherwise use featured cities */}
+                    {(allCities || cities)
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .filter(city => !searchQuery || city.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((city) => (
+                        <SelectItem key={city.id} value={city.slug}>
+                          {city.name}
+                        </SelectItem>
+                      ))
+                    }
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
-            <div className="w-full md:w-1/2">
-              <label htmlFor="trip-duration" className="block text-neutral-dark font-medium mb-2">Number of Days</label>
-              <div className="flex items-center">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={handleDaysDecrease}
-                  disabled={days <= 1}
-                  className="rounded-r-none"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <div className="w-full text-center py-3 px-4 border-t border-b border-neutral-light">
-                  {days} {days === 1 ? 'Day' : 'Days'}
+            <div className="w-full md:w-1/2" id="travel-duration">
+              <div className={`transition-all duration-300 ${selectedCity ? 'bg-blue-50 p-4 rounded-lg border border-blue-100' : ''}`}>
+                {selectedCity && (
+                  <div className="mb-3 text-center">
+                    <p className="text-primary font-medium">How many days are you travelling?</p>
+                  </div>
+                )}
+                <label htmlFor="trip-duration" className="block text-neutral-dark font-medium mb-2">Number of Days</label>
+                <div className="flex items-center">
+                  <Button 
+                    variant="default" 
+                    size="icon" 
+                    onClick={handleDaysDecrease}
+                    disabled={days <= 1}
+                    className="rounded-r-none bg-primary text-white hover:bg-primary-dark"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <div className="w-full text-center py-3 px-4 border-t border-b border-neutral-light">
+                    {days} {days === 1 ? 'Day' : 'Days'}
+                  </div>
+                  <Button 
+                    variant="default" 
+                    size="icon" 
+                    onClick={handleDaysIncrease}
+                    disabled={days >= 7}
+                    className="rounded-l-none bg-primary text-white hover:bg-primary-dark"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={handleDaysIncrease}
-                  disabled={days >= 7}
-                  className="rounded-l-none"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>

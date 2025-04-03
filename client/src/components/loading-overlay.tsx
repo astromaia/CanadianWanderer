@@ -18,31 +18,40 @@ export default function LoadingOverlay({
 }: LoadingOverlayProps) {
   const [statusMessage, setStatusMessage] = useState("Initializing itinerary generation...");
   
-  // Update status message based on progress
+  // Format city name for display
+  const formattedCityName = cityName ? formatCityName(cityName) : 'your destination';
+  
+  // Update status message based on progress and city
   useEffect(() => {
     if (isAI) {
       if (progress < 20) {
-        setStatusMessage("Analyzing destination information...");
+        setStatusMessage(`Analyzing ${formattedCityName}'s attractions and local favorites...`);
       } else if (progress < 40) {
-        setStatusMessage("Finding local attractions and activities...");
+        setStatusMessage(`Finding the best activities in ${formattedCityName}...`);
       } else if (progress < 60) {
-        setStatusMessage("Creating day-by-day schedule...");
+        setStatusMessage(`Creating your day-by-day ${formattedCityName} adventure...`);
       } else if (progress < 80) {
-        setStatusMessage("Optimizing activity timing and locations...");
+        setStatusMessage(`Optimizing your route through ${formattedCityName}...`);
       } else if (progress < 95) {
-        setStatusMessage("Adding traveler tips and recommendations...");
+        setStatusMessage(`Adding insider tips for ${formattedCityName}...`);
       } else {
-        setStatusMessage("Finalizing your personalized itinerary...");
+        setStatusMessage(`Finalizing your personalized ${formattedCityName} itinerary...`);
       }
     } else {
-      setStatusMessage("Loading your itinerary...");
+      if (progress < 30) {
+        setStatusMessage(`Loading ${formattedCityName} highlights...`);
+      } else if (progress < 60) {
+        setStatusMessage(`Preparing your ${formattedCityName} schedule...`);
+      } else if (progress < 90) {
+        setStatusMessage(`Gathering the best of ${formattedCityName}...`);
+      } else {
+        setStatusMessage(`Almost ready for your ${formattedCityName} adventure!`);
+      }
     }
-  }, [progress, isAI]);
+  }, [progress, isAI, formattedCityName]);
 
   if (!isOpen) return null;
   
-  const formattedCityName = cityName ? formatCityName(cityName) : 'your destination';
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">

@@ -11,7 +11,8 @@ const openai = new OpenAI({
 console.log("OpenAI client initialized with environment API key");
 
 // Using a more basic model to avoid quota issues
-// The user originally requested gpt-4o-mini, but we're using gpt-3.5-turbo for better reliability
+// The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// Using gpt-3.5-turbo for better reliability and to manage API usage quotas
 const MODEL = "gpt-3.5-turbo";
 
 /**
@@ -27,27 +28,46 @@ export async function generateItinerary(cityName: string, cityDescription: strin
     
     // Environment API key is being used from process.env.OPENAI_API_KEY
     
-    const systemPrompt = `You are an expert Canadian travel guide with detailed knowledge of ${cityName}. 
-    Create a detailed ${days}-day itinerary for ${cityName}, Canada. The itinerary should include:
+    const systemPrompt = `You are an expert Canadian travel guide with detailed knowledge of ${cityName}, Canada. 
+    Create a detailed ${days}-day itinerary for ${cityName}, focusing exclusively on authentic Canadian experiences. The itinerary should include:
     
     For each day:
-    1. A catchy title for the day's theme
+    1. A catchy title for the day's theme that captures the essence of Canadian culture or local highlights
     2. Three activities divided into morning, afternoon, and evening
     3. For each activity provide:
-       - A title prefixed with "Morning:", "Afternoon:", or "Evening:"
-       - Start and end times
-       - Duration
-       - Detailed description of the activity
-       - Specific location (address if possible)
-       - Approximate cost in CAD
-       - A helpful traveler tip related to that specific activity or location
+       - A title prefixed with "Morning:", "Afternoon:", or "Evening:" that's specific and descriptive
+       - Realistic start and end times considering Canadian business hours
+       - Duration that makes sense for the activity
+       - Detailed description of the activity highlighting Canadian significance
+       - Specific location with actual street names or neighborhoods in ${cityName}
+       - Approximate cost in CAD with realistic price ranges
+       - A helpful traveler tip related to that specific activity, location, or Canadian cultural norms
     
     Use this city description for context: ${cityDescription}
     
-    Make all recommendations realistic, specific to ${cityName}, and focus on Canadian culture and highlights.
-    Ensure activities logically flow and consider travel time between locations.`;
+    Important guidelines:
+    - Make all recommendations realistic, specific to ${cityName}, and focus on Canadian culture, nature, and local highlights
+    - Include a mix of popular attractions and hidden gems only locals would know
+    - Recommend authentic Canadian cuisine and local dining experiences
+    - Include seasonal activities appropriate for the time of year
+    - Ensure activities logically flow and consider travel time between locations using local transit options
+    - Highlight Canadian cultural nuances, etiquette, and local customs where relevant
+    - For multi-day itineraries, ensure each day has a distinct theme or focus area within ${cityName}
+    
+    Your itinerary should feel like it was created by a local Canadian who deeply understands the culture and attractions of ${cityName}.`;
 
-    const userPrompt = `Please create a ${days}-day travel itinerary for ${cityName}, Canada. Include morning, afternoon, and evening activities for each day.`;
+    const userPrompt = `Please create a detailed ${days}-day travel itinerary for ${cityName}, Canada, focusing on authentic Canadian experiences. 
+    
+    I'd like a comprehensive day-by-day plan that includes:
+    - Morning activities starting around 8-9am
+    - Afternoon activities that showcase the best of ${cityName}
+    - Evening activities including dining at local Canadian restaurants
+    - Specific locations with addresses or neighborhoods
+    - Realistic cost estimates in Canadian dollars
+    - Local transportation options between activities
+    - Insider tips that only locals would know
+    
+    Please make this itinerary specific to ${cityName} with activities that are uniquely Canadian and highlight the city's cultural and natural attractions. Include both popular must-see destinations and hidden gems.`;
 
     try {
       const response = await openai.chat.completions.create({
@@ -67,7 +87,7 @@ export async function generateItinerary(cityName: string, cityDescription: strin
       }
       
       // Now send a followup request to structure the data correctly
-      const structuringPrompt = `Convert the following travel itinerary for ${cityName} into a structured JSON format that follows this structure:
+      const structuringPrompt = `Convert the following travel itinerary for ${cityName}, Canada into a structured JSON format that follows exactly this structure:
       {
         "days": [
           {
@@ -80,19 +100,51 @@ export async function generateItinerary(cityName: string, cityDescription: strin
                 "endTime": "11:30 AM",
                 "duration": "2.5 hours",
                 "title": "Morning: Activity name",
+                "description": "Detailed description with rich information about the activity",
+                "location": "Specific address/location in ${cityName}",
+                "cost": "Cost in CAD with actual figures",
+                "tipTitle": "Brief title for the traveler tip",
+                "tipDescription": "Detailed helpful tip for travelers about this specific activity"
+              },
+              {
+                "id": 2,
+                "startTime": "12:30 PM",
+                "endTime": "4:00 PM",
+                "duration": "3.5 hours",
+                "title": "Afternoon: Activity name",
                 "description": "Detailed description",
                 "location": "Specific address/location",
                 "cost": "Cost in CAD",
-                "tipTitle": "Morning Activity Tip",
+                "tipTitle": "Afternoon Activity Tip",
                 "tipDescription": "Helpful tip for travelers"
               },
-              // Afternoon activity (similar structure)
-              // Evening activity (similar structure)
+              {
+                "id": 3,
+                "startTime": "6:00 PM",
+                "endTime": "9:00 PM",
+                "duration": "3 hours",
+                "title": "Evening: Activity name",
+                "description": "Detailed description",
+                "location": "Specific address/location",
+                "cost": "Cost in CAD",
+                "tipTitle": "Evening Activity Tip",
+                "tipDescription": "Helpful tip for travelers"
+              }
             ]
-          },
-          // Additional days follow the same structure
+          }
         ]
       }
+      
+      Important conversion rules:
+      1. Extract information from the original text to populate each field accurately
+      2. Keep all costs in CAD (Canadian dollars) format
+      3. Make sure every "title" field for activities begins with either "Morning:", "Afternoon:", or "Evening:"
+      4. Extract actual addresses, neighborhoods, or specific locations from the text
+      5. Each day must have exactly 3 activities (morning, afternoon, evening)
+      6. Day titles should be descriptive and reflect the theme of activities for that day
+      7. Make sure all tipTitle and tipDescription fields contain helpful, practical traveler advice
+      8. Each day's activities should have sequential IDs starting from (dayNumber-1)*3+1
+      9. If the exact information isn't available in the text, use the most reasonable inference based on the content
       
       Original itinerary text:
       ${itineraryText}`;
