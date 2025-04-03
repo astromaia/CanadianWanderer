@@ -1,16 +1,23 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Plus, Minus } from "lucide-react";
+import { Calendar, Plus, Minus, Search, Sparkles } from "lucide-react";
 import { formatCityName } from "@/lib/utils";
 import type { City } from "@shared/schema";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface DestinationSectionProps {
   cities: City[];
   selectedCity: string;
   days: number;
+  searchQuery?: string;
+  useAI?: boolean;
   onCitySelect: (city: string) => void;
   onDaysChange: (days: number) => void;
+  onSearchChange?: (query: string) => void;
+  onAIToggle?: (useAI: boolean) => void;
   onGenerateItinerary: () => void;
 }
 
@@ -18,8 +25,12 @@ export default function DestinationSection({
   cities,
   selectedCity,
   days,
+  searchQuery = "",
+  useAI = true,
   onCitySelect,
   onDaysChange,
+  onSearchChange,
+  onAIToggle,
   onGenerateItinerary
 }: DestinationSectionProps) {
   const handleCityCardClick = (slug: string) => {
@@ -38,6 +49,18 @@ export default function DestinationSection({
     }
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onSearchChange) {
+      onSearchChange(e.target.value);
+    }
+  };
+
+  const handleAIToggle = (checked: boolean) => {
+    if (onAIToggle) {
+      onAIToggle(checked);
+    }
+  };
+
   return (
     <section id="destinations" className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -48,30 +71,60 @@ export default function DestinationSection({
           </p>
         </div>
         
+        {/* Search box */}
+        <div className="relative max-w-md mx-auto mb-8">
+          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <Input
+            type="search"
+            placeholder="Search for a Canadian city or attraction..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="ps-10 py-6"
+          />
+        </div>
+        
         {/* Destination Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {cities.map((city) => (
-            <div 
-              key={city.id}
-              className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer group relative ${
-                selectedCity === city.slug ? 'ring-2 ring-secondary' : ''
-              }`}
-              onClick={() => handleCityCardClick(city.slug)}
-            >
+          {cities.length > 0 ? (
+            cities.map((city) => (
               <div 
-                className="h-56 bg-cover bg-center relative"
-                style={{ backgroundImage: `url(${city.imageUrl})` }}
+                key={city.id}
+                className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer group relative ${
+                  selectedCity === city.slug ? 'ring-2 ring-secondary' : ''
+                }`}
+                onClick={() => handleCityCardClick(city.slug)}
               >
-                <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="font-semibold text-white text-2xl">{city.name}</h3>
+                <div 
+                  className="h-56 bg-cover bg-center relative"
+                  style={{ backgroundImage: `url(${city.imageUrl})` }}
+                >
+                  <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 className="font-semibold text-white text-2xl">{city.name}</h3>
+                  </div>
+                </div>
+                <div className="p-4 bg-white">
+                  <p className="text-neutral-dark">{city.description}</p>
                 </div>
               </div>
-              <div className="p-4 bg-white">
-                <p className="text-neutral-dark">{city.description}</p>
-              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10">
+              <h3 className="text-xl font-medium text-neutral-dark mb-2">No destinations found</h3>
+              <p className="text-neutral-muted">Try another search term or browse all Canadian cities</p>
+              {searchQuery && (
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => onSearchChange?.("")}
+                >
+                  Clear Search
+                </Button>
+              )}
             </div>
-          ))}
+          )}
         </div>
         
         {/* Destination Selection Form */}
@@ -121,7 +174,20 @@ export default function DestinationSection({
             </div>
           </div>
           
-          <div className="mt-6 text-center">
+          {/* AI Toggle */}
+          <div className="flex items-center justify-center space-x-2 mt-6">
+            <Label htmlFor="ai-toggle" className="flex items-center cursor-pointer">
+              <Sparkles className="h-4 w-4 text-secondary mr-2" />
+              <span>Use AI for personalized itinerary</span>
+            </Label>
+            <Switch
+              id="ai-toggle"
+              checked={useAI}
+              onCheckedChange={handleAIToggle}
+            />
+          </div>
+          
+          <div className="mt-4 text-center">
             <Button 
               onClick={onGenerateItinerary} 
               disabled={!selectedCity}
@@ -130,6 +196,11 @@ export default function DestinationSection({
             >
               <Calendar className="mr-2 h-5 w-5" /> Generate Itinerary
             </Button>
+            {useAI && (
+              <p className="text-sm text-neutral-muted mt-2">
+                Using AI to create a custom itinerary with the latest information
+              </p>
+            )}
           </div>
         </div>
       </div>
