@@ -651,35 +651,88 @@ export class MemStorage implements IStorage {
     const itineraryDays: ItineraryDay[] = [];
     const dayHeaders = await this.getDayHeadersByCityId(city.id);
     
+    // Only process the requested number of days
     for (let dayNumber = 1; dayNumber <= days; dayNumber++) {
+      // Look for the day header matching this day number
       const dayHeader = dayHeaders.find(h => h.dayNumber === dayNumber);
-      if (!dayHeader) continue;
       
+      // If we don't have a day header for this day, create a default one
+      const title = dayHeader ? dayHeader.title : `Day ${dayNumber} in ${city.name}`;
+      
+      // Get itinerary items for this day if they exist
       const itineraryItems = await this.getItineraryItemsByCityAndDay(city.id, dayNumber);
       
       const activities: ItineraryActivity[] = [];
       
-      for (const item of itineraryItems) {
-        const attraction = await this.getAttractionById(item.attractionId);
-        if (!attraction) continue;
-        
+      // If we have itinerary items, use them
+      if (itineraryItems.length > 0) {
+        for (const item of itineraryItems) {
+          const attraction = await this.getAttractionById(item.attractionId);
+          if (!attraction) continue;
+          
+          activities.push({
+            id: item.id,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            duration: item.duration,
+            title: item.title,
+            description: attraction.description,
+            location: attraction.location,
+            cost: attraction.cost,
+            tipTitle: attraction.tipTitle,
+            tipDescription: attraction.tipDescription
+          });
+        }
+      } 
+      // If no items for this day, add default activities
+      else {
+        // Default morning activity
         activities.push({
-          id: item.id,
-          startTime: item.startTime,
-          endTime: item.endTime,
-          duration: item.duration,
-          title: item.title,
-          description: attraction.description,
-          location: attraction.location,
-          cost: attraction.cost,
-          tipTitle: attraction.tipTitle,
-          tipDescription: attraction.tipDescription
+          id: dayNumber * 3 - 2,
+          startTime: "9:00 AM",
+          endTime: "12:00 PM",
+          duration: "3 hours",
+          title: `Morning: Exploring ${city.name}`,
+          description: `Morning exploration of ${city.name}.`,
+          location: `${city.name} downtown area`,
+          cost: "Varies",
+          tipTitle: "Morning Tip",
+          tipDescription: "Start early to avoid crowds."
+        });
+        
+        // Default afternoon activity
+        activities.push({
+          id: dayNumber * 3 - 1,
+          startTime: "1:00 PM",
+          endTime: "4:00 PM",
+          duration: "3 hours",
+          title: `Afternoon: ${city.name} Activities`,
+          description: `Afternoon activities in ${city.name}.`,
+          location: `${city.name} central area`,
+          cost: "Varies",
+          tipTitle: "Afternoon Tip",
+          tipDescription: "Check local restaurants for lunch specials."
+        });
+        
+        // Default evening activity
+        activities.push({
+          id: dayNumber * 3,
+          startTime: "6:00 PM",
+          endTime: "9:00 PM",
+          duration: "3 hours",
+          title: `Evening: ${city.name} Nightlife`,
+          description: `Evening experiences in ${city.name}.`,
+          location: `${city.name} entertainment district`,
+          cost: "Varies",
+          tipTitle: "Evening Tip",
+          tipDescription: "Book restaurants in advance for dinner."
         });
       }
       
+      // Add this day to our itinerary
       itineraryDays.push({
         dayNumber,
-        title: dayHeader.title,
+        title,
         activities
       });
     }

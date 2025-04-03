@@ -161,6 +161,59 @@ export async function generateItinerary(cityName: string, cityDescription: strin
         const structuredItinerary = JSON.parse(structuredResponse.choices[0].message.content || "{}");
         console.log("Successfully generated structured itinerary");
         
+        // Make sure we return exactly the number of days requested
+        if (structuredItinerary.days && structuredItinerary.days.length > days) {
+          // Trim excess days if we get more than requested
+          structuredItinerary.days = structuredItinerary.days.slice(0, days);
+        } else if (structuredItinerary.days && structuredItinerary.days.length < days) {
+          // If we get fewer days than requested, add placeholder days to match
+          const existingDays = structuredItinerary.days.length;
+          for (let i = existingDays; i < days; i++) {
+            structuredItinerary.days.push({
+              dayNumber: i + 1,
+              title: `Day ${i + 1} in ${cityName}`,
+              activities: [
+                {
+                  id: i * 3 + 1,
+                  startTime: "9:00 AM",
+                  endTime: "12:00 PM",
+                  duration: "3 hours",
+                  title: `Morning: Exploring ${cityName}`,
+                  description: "Explore the main attractions in the morning.",
+                  location: `${cityName} downtown area`,
+                  cost: "Varies",
+                  tipTitle: "Morning Tip",
+                  tipDescription: "Start early to avoid crowds."
+                },
+                {
+                  id: i * 3 + 2,
+                  startTime: "1:00 PM",
+                  endTime: "4:00 PM",
+                  duration: "3 hours",
+                  title: `Afternoon: ${cityName} Activities`,
+                  description: `Enjoy the afternoon in ${cityName}.`,
+                  location: `${cityName} central area`,
+                  cost: "Varies",
+                  tipTitle: "Afternoon Tip",
+                  tipDescription: "Check local restaurants for lunch specials."
+                },
+                {
+                  id: i * 3 + 3,
+                  startTime: "6:00 PM",
+                  endTime: "9:00 PM", 
+                  duration: "3 hours",
+                  title: `Evening: ${cityName} Nightlife`,
+                  description: `Experience the evening in ${cityName}.`,
+                  location: `${cityName} entertainment district`,
+                  cost: "Varies",
+                  tipTitle: "Evening Tip",
+                  tipDescription: "Book restaurants in advance for dinner."
+                }
+              ]
+            });
+          }
+        }
+        
         return structuredItinerary;
       } catch (structuringError: any) {
         console.error("Error during JSON structuring, trying to parse the original text:", structuringError);
