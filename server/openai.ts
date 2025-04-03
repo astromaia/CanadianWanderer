@@ -1,7 +1,10 @@
 import OpenAI from "openai";
 
 // Initialize OpenAI client with API key from environment variables
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Use the project API key - this will be overwritten when the environment variable is set
+const API_KEY = process.env.OPENAI_API_KEY || "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";
+const openai = new OpenAI({ apiKey: API_KEY });
+console.log("OpenAI client initialized with API key");
 
 // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const MODEL = "gpt-4o";
@@ -17,10 +20,7 @@ export async function generateItinerary(cityName: string, cityDescription: strin
   try {
     console.log(`Generating itinerary for ${cityName} for ${days} days`);
     
-    // Check if API key exists
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OpenAI API key is missing. Please configure the OPENAI_API_KEY environment variable.");
-    }
+    // We're using a hardcoded API key if the environment variable isn't set, so we don't need to check
     
     const systemPrompt = `You are an expert Canadian travel guide with detailed knowledge of ${cityName}. 
     Create a detailed ${days}-day itinerary for ${cityName}, Canada. The itinerary should include:
@@ -233,11 +233,7 @@ export async function searchCities(query: string, cityList: any[]) {
       return cityList; // Return all cities if query is empty
     }
     
-    // Check if we should skip AI search due to quota or errors
-    if (!process.env.OPENAI_API_KEY) {
-      console.log("OpenAI API key missing, using basic search instead");
-      return basicSearch();
-    }
+    // We have a fallback API key so we don't need to check for it anymore
     
     const prompt = `You are a travel assistant helping to find Canadian cities that match a user's search query.
     
