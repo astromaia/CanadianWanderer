@@ -186,6 +186,11 @@ export default function DestinationSection({
               onCheckedChange={handleAIToggle}
             />
           </div>
+          {useAI && (
+            <div className="mt-2 text-center text-sm text-gray-600">
+              AI generates unique, tailored itineraries for your trip
+            </div>
+          )}
           
           <div className="mt-4 text-center">
             <Button 

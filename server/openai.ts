@@ -1,10 +1,26 @@
 import OpenAI from "openai";
 
-// Initialize OpenAI client with API key from environment variables
-// Use the project API key - this will be overwritten when the environment variable is set
-const API_KEY = process.env.OPENAI_API_KEY || "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";
-const openai = new OpenAI({ apiKey: API_KEY });
-console.log("OpenAI client initialized with API key");
+/**
+ * Creates a new OpenAI client with the provided API key
+ * If no key is provided, falls back to environment variable
+ * @returns OpenAI instance
+ */
+function createOpenAIClient() {
+  // Check if environment variable exists
+  const envKey = process.env.OPENAI_API_KEY;
+  
+  // Hardcoded key for development purposes - will be overridden by environment variable if set
+  const fallbackKey = "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";
+  
+  // Use environment variable if available, otherwise use fallback
+  const apiKey = envKey || fallbackKey;
+  
+  console.log("OpenAI client initialized with API key");
+  return new OpenAI({ apiKey });
+}
+
+// Initialize OpenAI client
+const openai = createOpenAIClient();
 
 // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const MODEL = "gpt-4o";

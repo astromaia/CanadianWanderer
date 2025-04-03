@@ -84,16 +84,21 @@ export default function Home() {
     setLoadingProgress(0);
     
     try {
+      // If AI is turned off or we've hit quota limits before, use pre-built itineraries
+      const usingAI = useAI && !skipAI;
+      
       // AI generation takes longer, so adjust the time accordingly
-      const simulationTime = useAI && !skipAI ? 8000 : 3000;
+      const simulationTime = usingAI ? 8000 : 3000;
       
       // Simulate progress while generating the itinerary
       await simulateProgress(setLoadingProgress, simulationTime);
       
       // Prepare the endpoint with proper flags
       const endpoint = `/api/itinerary?city=${selectedCity}&days=${days}${
-        useAI && !skipAI ? '&useAI=true' : ''
+        usingAI ? '&useAI=true' : ''
       }${skipAI ? '&skipAI=true' : ''}`;
+      
+      console.log(`Fetching itinerary from: ${endpoint}`);
       
       // Manual fetch to better handle errors
       const response = await fetch(endpoint);
@@ -102,12 +107,16 @@ export default function Home() {
         const errorData = await response.json();
         
         // Check if this is a quota error
-        if (response.status === 429 || (errorData.error && errorData.error.includes('quota'))) {
+        if (response.status === 429 || (errorData.error && (
+            errorData.error.includes('quota') || 
+            errorData.error.includes('rate limit')
+          ))) {
           setSkipAI(true); // Mark to skip AI for future requests
+          setUseAI(false); // Turn off AI toggle
           
           toast({
             title: "AI Service at Capacity",
-            description: "We're using pre-built itineraries instead. You can still enjoy great travel recommendations!",
+            description: "Our AI service is currently at capacity. We're using pre-built itineraries instead. You can still enjoy great travel recommendations!",
             variant: "default"
           });
           
@@ -135,6 +144,17 @@ export default function Home() {
             variant: "default"
           });
           setSkipAI(true);
+          
+          // If we're using a fallback because of AI quota issues, also turn off the toggle
+          if (data._fallbackReason?.includes('quota') || data._fallbackReason?.includes('exceeded')) {
+            setUseAI(false);
+          }
+        } else if (usingAI) {
+          toast({
+            title: "AI Itinerary Generated",
+            description: "Your personalized travel itinerary has been created with AI.",
+            variant: "default"
+          });
         }
         
         setItinerary(data);
