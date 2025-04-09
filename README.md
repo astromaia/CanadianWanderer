@@ -1,4 +1,4 @@
-Canadian AI Travel Buddy 🇨🇦
+Canadian Explorer 🇨🇦
 An AI-powered itinerary planner for domestic Canadian travel
 
 Project Overview:
